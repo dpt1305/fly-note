@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.540.0",
+    "axios": "^1.6.8"
+  },
+  "devDependencies": {
+    "serverless-offline": "^13.3.3"
+  },
+  "scripts": {
+    "start": "sls offline start",
+    "build": "sls offline build",
+    "deploy": "sls deploy",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module"
+}

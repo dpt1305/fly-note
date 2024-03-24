@@ -1,0 +1,34 @@
+org: tungjj
+app: fly-note
+service: scheduled-email
+frameworkVersion: '3'
+plugins:
+  - serverless-offline
+provider:
+  name: aws
+  stage: dev
+  runtime: nodejs20.x
+  region: ap-southeast-1
+  architecture: x86_64
+  httpApi:
+    payload: '2.0'
+    metrics: true
+  tags:
+    name: fly-note
+  iam:
+    role:
+      name: FlyNote-UseSES
+      managedPolicies:
+        - arn:aws:iam::aws:policy/AmazonSESFullAccess
+      tags:
+        name: fly-note
+functions:
+  SendEmail:
+    name: fly-note-send-email
+    handler: sendEmail.handler
+    runtime: nodejs20.x
+    architecture: x86_64
+    events:
+      - httpApi:
+          method: POST
+          path: /sendEmail
