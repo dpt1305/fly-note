@@ -1,7 +1,7 @@
 org: tungjj
 app: fly-note
 service: notes
-frameworkVersion: '3'
+frameworkVersion: "3"
 plugins:
   - serverless-offline
 provider:
@@ -11,7 +11,7 @@ provider:
   region: ap-southeast-1
   architecture: x86_64
   httpApi:
-    payload: '2.0'
+    payload: "2.0"
     metrics: true
   tags:
     name: fly-note
@@ -32,7 +32,7 @@ provider:
       managedPolicies:
         - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
       tags:
-        name: FlyNote
+        name: fly-note
 resources:
   Resources:
     flyNoteDb:
