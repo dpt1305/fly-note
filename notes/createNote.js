@@ -16,7 +16,7 @@ const handler = async (event) => {
     const email = eventBody.email;
     const content = eventBody.content ? eventBody.content : "default";
     const noteId = uuidv4();
-    const createdDate = new Date().toUTCString();
+    const createdDate = new Date().toISOString();
 
     if (!eventBody.email) {
       return response(STATUS_CODE.BAD_REQUEST, null, JSON.stringify(error));

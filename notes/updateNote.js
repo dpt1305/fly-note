@@ -15,7 +15,7 @@ export const handler = async (event) => {
     const email = eventBody.email;
     const noteId = eventBody.noteId;
     const content = eventBody.content ? eventBody.content : "default";
-    const updatedDate = new Date().toUTCString();
+    const updatedDate = new Date().toISOString();
 
     if (email == null || noteId == null) {
       return response(STATUS_CODE.BAD_REQUEST, null, JSON.stringify(error));

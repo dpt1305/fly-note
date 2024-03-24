@@ -1,32 +1,26 @@
 org: tungjj
 app: fly-note
 service: notes
-frameworkVersion: "3"
-
+frameworkVersion: '3'
 plugins:
   - serverless-offline
-
 provider:
   name: aws
   stage: dev
   runtime: nodejs20.x
   region: ap-southeast-1
   architecture: x86_64
-
   httpApi:
-    payload: "2.0"
+    payload: '2.0'
     metrics: true
-
   tags:
     name: fly-note
-
-  # Role
   iam:
     role:
       name: FlyNote-FullAccess-DynamoDB
-      statements: # permissions for all of your functions can be set here
+      statements:
         - Effect: Allow
-          Action: # Gives permission to DynamoDB tables in a specific region
+          Action:
             - dynamodb:DescribeTable
             - dynamodb:Query
             - dynamodb:Scan
@@ -34,13 +28,12 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
-          Resource: "arn:aws:dynamodb:ap-east-1:*:*"
+          Resource: arn:aws:dynamodb:ap-east-1:*:*
       managedPolicies:
-        - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
       tags:
         name: FlyNote
-
-resources: # CloudFormation template syntax from here on.
+resources:
   Resources:
     flyNoteDb:
       Type: AWS::DynamoDB::Table
@@ -59,7 +52,6 @@ resources: # CloudFormation template syntax from here on.
         ProvisionedThroughput:
           ReadCapacityUnits: 2
           WriteCapacityUnits: 3
-
 functions:
   CreateNote:
     handler: createNote.handler
@@ -67,8 +59,6 @@ functions:
     architecture: x86_64
     events:
       - httpApi:
-          # cors: true
-          # allowedOrigins: "*"
           method: POST
           path: /note
   UpdateNote:
@@ -77,8 +67,6 @@ functions:
     architecture: x86_64
     events:
       - httpApi:
-          # cors: true
-          # allowedOrigins: "*"
           method: PUT
           path: /note
   GetNote:
@@ -87,8 +75,6 @@ functions:
     architecture: x86_64
     events:
       - httpApi:
-          # cors: true
-          # allowedOrigins: "*"
           method: GET
           path: /note
   DeleteNote:
@@ -97,7 +83,5 @@ functions:
     architecture: x86_64
     events:
       - httpApi:
-          # cors: true
-          # allowedOrigins: "*"
           method: DELETE
           path: /note
