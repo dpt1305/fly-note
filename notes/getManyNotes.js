@@ -1,5 +1,5 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { constant } from "./constant.js";
 import { STATUS_CODE, response } from "./responseMessage.js";
 
@@ -10,27 +10,23 @@ const handler = async (event) => {
     const docClient = DynamoDBDocumentClient.from(client);
 
     // 2. get data
-    const noteId = `${event.queryStringParameters?.noteId}`;
     const email = `${event.queryStringParameters?.email}`;
 
     // 3. parse
-    const command = new GetCommand({
+    const getEmail = new QueryCommand({
       TableName: constant.NOTE_TABLE,
-      Key: {
-        noteId,
-        email,
+      KeyConditionExpression: "email = :email ",
+      ExpressionAttributeValues: {
+        ":email": `${email}`,
       },
+      ConsistentRead: true,
     });
 
     // 4. send request
-    const getResult = await docClient.send(command);
+    const getResult = await docClient.send(getEmail);
 
     // 5. return
-    if (!getResult.Item) {
-      return response(STATUS_CODE.NOT_FOUND);
-    }
-
-    return response(STATUS_CODE.SUCCESS, null, JSON.stringify(getResult.Item));
+    return response(STATUS_CODE.SUCCESS, null, JSON.stringify(getResult.Items));
   } catch (error) {
     console.log(error);
     return response(STATUS_CODE.BAD_REQUEST, null, JSON.stringify(error));

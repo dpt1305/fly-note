@@ -38,7 +38,7 @@ resources:
     flyNoteDb:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: notesTable
+        TableName: noteTable
         AttributeDefinitions:
           - AttributeName: email
             AttributeType: S
@@ -52,6 +52,23 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 2
           WriteCapacityUnits: 3
+    flyNoteEmailDb:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: emailTable
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+          - AttributeName: dateTime
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+          - AttributeName: dateTime
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 3
+          WriteCapacityUnits: 2
 functions:
   CreateNote:
     handler: createNote.handler
@@ -77,6 +94,14 @@ functions:
       - httpApi:
           method: GET
           path: /note
+  GetManyNotes:
+    handler: getManyNotes.handler
+    runtime: nodejs20.x
+    architecture: x86_64
+    events:
+      - httpApi:
+          method: GET
+          path: /notes
   DeleteNote:
     handler: deleteNote.handler
     runtime: nodejs20.x

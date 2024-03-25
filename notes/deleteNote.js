@@ -4,7 +4,7 @@ import {
   DeleteCommand,
   GetCommand,
 } from "@aws-sdk/lib-dynamodb";
-import * as constant from "./constant.js";
+import { constant } from "./constant.js";
 import { STATUS_CODE, response } from "./responseMessage.js";
 
 const handler = async (event) => {
