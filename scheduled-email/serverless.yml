@@ -1,7 +1,7 @@
 org: tungjj
 app: fly-note
 service: scheduled-email
-frameworkVersion: '3'
+frameworkVersion: "3"
 plugins:
   - serverless-offline
 provider:
@@ -11,24 +11,86 @@ provider:
   region: ap-southeast-1
   architecture: x86_64
   httpApi:
-    payload: '2.0'
+    payload: "2.0"
     metrics: true
   tags:
     name: fly-note
-  iam:
-    role:
-      name: FlyNote-UseSES
-      managedPolicies:
-        - arn:aws:iam::aws:policy/AmazonSESFullAccess
-      tags:
-        name: fly-note
+  # iam:
+  #   role:
+  #     name: FlyNote-EmailRole
+  #     managedPolicies:
+  #       - arn:aws:iam::aws:policy/AmazonSESFullAccess
+  #       - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+
+  #     tags:
+  #       name: fly-note
 functions:
-  SendEmail:
-    name: fly-note-send-email
-    handler: sendEmail.handler
+  distributeEmail:
+    name: fly-note-distribute-email
+    handler: distributeEmail.handler
     runtime: nodejs20.x
     architecture: x86_64
+    role: FlyNoteDistributeMessages
     events:
       - httpApi:
           method: POST
+          path: /distributeEmail
+
+  consumeEmail:
+    name: fly-note-consume-email
+    handler: consumeEmail.handler
+    runtime: nodejs20.x
+    architecture: x86_64
+    role: FlyNoteReceiveMessages
+    events:
+      - sqs:
+          arn: arn:aws:sqs:ap-southeast-1:081322589116:FlyNoteQueue
+          maximumConcurrency: 5
+      - httpApi:
+          method: POST
           path: /sendEmail
+
+resources:
+  Resources:
+    FlyNoteReceiveMessages:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: FlyNoteReceiveMessages
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AmazonSESFullAccess
+          - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole
+    FlyNoteDistributeMessages:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: FlyNoteDistributeMessages
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        # note that these rights are needed if you want your function to be able to communicate with resources within your vpc
+        Policies:
+          - PolicyName: allowSendMessagesToQueuePolicy
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow # note that these rights are given in the default policy and are required if you want logs out of your lambda(s)
+                  Action:
+                    - sqs:SendMessage
+                  Resource:
+                    - arn:aws:sqs:ap-southeast-1:081322589116:*
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AmazonSESFullAccess
+          - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
